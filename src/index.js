@@ -9,9 +9,11 @@ import { InMemoryCache } from "apollo-cache-inmemory";
 import { ApolloClient, gql } from "apollo-boost";
 
 import { store, persistor } from "./redux/store";
-
+import { resolvers, typeDefs } from "./graphql/resolvers";
 import "./index.css";
 import App from "./App";
+
+
 
 const httpLink = createHttpLink({
   uri: "https://crwn-clothing.com",
@@ -21,13 +23,22 @@ const cache = new InMemoryCache();
 
 const client = new ApolloClient({
   link: httpLink,
+  typeDefs,
+  resolvers,
   cache,
 });
-client.query(
-  {
+
+client.writeData({
+  data: {
+    cartHidden: true,
+  },
+});
+
+client
+  .query({
     query: gql`
       {
-        getCollectionsByTitle (title: "hats") {
+        getCollectionsByTitle(title: "hats") {
           title
           id
           items {
@@ -38,9 +49,9 @@ client.query(
           }
         }
       }
-    `
-  }
-).then(res => console.log(res));
+    `,
+  })
+  .then((res) => console.log(res));
 
 ReactDOM.render(
   <ApolloProvider client={client}>
